@@ -2,7 +2,7 @@
 
 PlatformIO firmware for an ESP32 with built-in WiFi and a 170x320 ST7789 TFT screen. It queries Grafana Cloud Metrics through the Prometheus HTTP API and renders a colorful landscape dashboard.
 
-This project deliberately avoids the downloaded `Day N` naming pattern.
+![dashboard](dashboard.png)
 
 ## Hardware Defaults
 
@@ -25,6 +25,9 @@ const char* WIFI_PASSWORD = "your wifi password";
 const char* GRAFANA_PROMETHEUS_BASE_URL = "https://prometheus-prod-XX-prod-REGION.grafana.net/api/prom";
 const char* GRAFANA_METRICS_USER = "123456";
 const char* GRAFANA_API_TOKEN = "glc_xxx";
+
+const unsigned long METRIC_REFRESH_MS = 60000;
+const unsigned long PAGE_ROTATE_MS = 9000;
 ```
 
 Then tune `METRIC_QUERIES` for the metrics you want on screen:
@@ -32,8 +35,11 @@ Then tune `METRIC_QUERIES` for the metrics you want on screen:
 ```cpp
 static const MetricQueryConfig METRIC_QUERIES[] = {
     {"Agent Turns", "sum(rate(copilot_chat_agent_turn_count_sum[5m]))", "/s", 1.0f},
-    {"Tokens", "sum(rate(gen_ai_client_token_usage_sum[5m]))", "/s", 1.0f}
+    {"Tool Calls", "sum(rate(copilot_chat_tool_call_count_total[5m]))", "/s", 1.0f},
+    {"Tokens", "sum(rate(gen_ai_client_token_usage_sum[5m]))", "/s", 1.0f},
+    {"Sessions", "sum(rate(copilot_chat_session_count_total[5m]))", "/s", 1.0f}
 };
+
 ```
 
 The firmware reads instant Prometheus query results. Use PromQL that returns one vector sample. `sum(...)` is useful because it collapses labels into a single value that fits the display.
