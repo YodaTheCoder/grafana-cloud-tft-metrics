@@ -77,6 +77,21 @@ pio device monitor
 
 The first boot screen will remind you to edit `include/config.h` if placeholders are still present.
 
+## VS Code Settings
+
+The `.vscode/settings.json` enables Copilot Chat OpenTelemetry export to Grafana Cloud, which is what this firmware is designed to visualise:
+
+```json
+{
+    "github.copilot.chat.otel.enabled": true,
+    "github.copilot.chat.otel.exporterType": "otlp-http",
+    "github.copilot.chat.otel.otlpEndpoint": "https://otlp-gateway-prod-gb-south-1.grafana.net/otlp",
+    "github.copilot.chat.otel.captureContent": false
+}
+```
+
+Set `OTEL_EXPORTER_OTLP_HEADERS` in `.envrc` (or your shell) with your Grafana Cloud OTLP Basic auth token so VS Code can authenticate when exporting telemetry. The `captureContent` flag is kept `false` to avoid storing prompt and response text in Grafana Cloud.
+
 ## Security Notes
 
 The firmware uses HTTPS but currently calls `WiFiClientSecure::setInsecure()` to avoid storing a root certificate on the ESP32. For a more locked-down deployment, replace that with the current root CA for your Grafana Cloud endpoint and call `secureClient.setCACert(...)` in `setup()`.
